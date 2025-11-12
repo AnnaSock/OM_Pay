@@ -2,6 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Enums\Role;
+use App\Models\Client;
+use App\Models\Marchand;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -24,11 +27,13 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
-            'remember_token' => Str::random(10),
+            'id' => (string) Str::uuid(),
+            'nom' => $this->faker->lastName(),
+            'prenom' => $this->faker->firstName(),
+            'adresse' => $this->faker->address(),
+            'nci' => $this->faker->unique()->numerify('##########'),
+            'email' => $this->faker->unique()->safeEmail(),
+            'role' => Role::CLIENT, // Par défaut client
         ];
     }
 
@@ -37,8 +42,28 @@ class UserFactory extends Factory
      */
     public function unverified(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'email_verified_at' => null,
+        ]);
+    }
+
+    /**
+     * Create a client user.
+     */
+    public function client(): static
+    {
+        return $this->state(fn(array $attributes) => [
+            'role' => Role::CLIENT,
+        ]);
+    }
+
+    /**
+     * Create a marchand user.
+     */
+    public function marchand(): static
+    {
+        return $this->state(fn(array $attributes) => [
+            'role' => Role::MARCHAND,
         ]);
     }
 }

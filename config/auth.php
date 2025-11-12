@@ -40,7 +40,24 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        'api' => [
+            'driver' => 'passport',
+            'provider' => 'users',
+        ],
+
+        'api-client' => [
+            'driver' => 'passport',
+            'provider' => 'clients',
+        ],
+
+        'api-marchand' => [
+            'driver' => 'passport',
+            'provider' => 'marchands',
+        ],
     ],
+
+
 
     /*
     |--------------------------------------------------------------------------
@@ -65,10 +82,15 @@ return [
             'model' => App\Models\User::class,
         ],
 
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
+        'clients' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Client::class,
+        ],
+
+        'marchands' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Marchand::class,
+        ],
     ],
 
     /*
@@ -91,8 +113,15 @@ return [
     */
 
     'passwords' => [
-        'users' => [
-            'provider' => 'users',
+        'clients' => [
+            'provider' => 'clients',
+            'table' => 'password_reset_tokens',
+            'expire' => 60,
+            'throttle' => 60,
+        ],
+
+        'marchands' => [
+            'provider' => 'marchands',
             'table' => 'password_reset_tokens',
             'expire' => 60,
             'throttle' => 60,

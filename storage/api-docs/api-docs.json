@@ -1,0 +1,648 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "OM Pay API",
+        "description": "API de paiement mobile OM Pay avec authentification OTP",
+        "contact": {
+            "email": "support@ompay.com"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8000",
+            "description": "Serveur de développement"
+        },
+        {
+            "url": "https://api.ompay.com",
+            "description": "Serveur de production"
+        }
+    ],
+    "paths": {
+        "/api/login": {
+            "post": {
+                "tags": [
+                    "Authentification"
+                ],
+                "summary": "Authentification utilisateur",
+                "description": "Authentifie un utilisateur avec login et mot de passe, retourne des tokens Bearer",
+                "operationId": "login",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "login",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "login": {
+                                        "description": "Login de l'utilisateur",
+                                        "type": "string",
+                                        "example": "user123"
+                                    },
+                                    "password": {
+                                        "description": "Mot de passe",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Authentification réussie",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Authentification réussie"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "access_token": {
+                                                    "type": "string",
+                                                    "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9..."
+                                                },
+                                                "refresh_token": {
+                                                    "type": "string",
+                                                    "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9..."
+                                                },
+                                                "user_type": {
+                                                    "type": "string",
+                                                    "example": "App\\\\Models\\\\Client"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Échec d'authentification",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Authentification échouée"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/me": {
+            "get": {
+                "tags": [
+                    "Utilisateur"
+                ],
+                "summary": "Informations de l'utilisateur connecté",
+                "description": "Récupère les informations complètes de l'utilisateur authentifié avec son compte et ses transactions",
+                "operationId": "getUserInfo",
+                "responses": {
+                    "200": {
+                        "description": "Informations utilisateur récupérées avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Informations utilisateur récupérées avec succès"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "$ref": "#/components/schemas/User"
+                                                },
+                                                "compte": {
+                                                    "$ref": "#/components/schemas/Compte"
+                                                },
+                                                "transactions": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/Transaction"
+                                                    }
+                                                },
+                                                "summary": {
+                                                    "properties": {
+                                                        "total_transactions": {
+                                                            "type": "integer",
+                                                            "example": 5
+                                                        },
+                                                        "current_balance": {
+                                                            "type": "number",
+                                                            "format": "float",
+                                                            "example": 1500.5
+                                                        },
+                                                        "last_transaction_date": {
+                                                            "type": "string",
+                                                            "format": "date-time"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Token d'authentification manquant ou invalide",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Utilisateur ou compte non trouvé",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Aucun compte trouvé pour cet utilisateur"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/sendOtp": {
+            "post": {
+                "tags": [
+                    "OTP"
+                ],
+                "summary": "Envoyer un code OTP",
+                "description": "Génère et envoie un code OTP à 6 chiffres pour l'authentification de l'utilisateur",
+                "operationId": "sendOtp",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "numero_user"
+                                ],
+                                "properties": {
+                                    "numero_user": {
+                                        "description": "Numéro d'utilisateur pour recevoir l'OTP",
+                                        "type": "string",
+                                        "example": "771234567"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OTP envoyé avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "OTP généré et envoyé"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "OTP envoyé avec succès"
+                                                },
+                                                "otp": {
+                                                    "description": "OTP affiché seulement en développement",
+                                                    "type": "string",
+                                                    "example": "123456"
+                                                },
+                                                "sent_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2024-01-15 10:30:00"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Numéro d'utilisateur invalide",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Numéro d'utilisateur invalide"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/verifyOtp": {
+            "post": {
+                "tags": [
+                    "OTP"
+                ],
+                "summary": "Vérifier un code OTP",
+                "description": "Vérifie le code OTP fourni et retourne les informations de vérification",
+                "operationId": "verifyOtp",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "numero_user",
+                                    "otp"
+                                ],
+                                "properties": {
+                                    "numero_user": {
+                                        "description": "Numéro d'utilisateur",
+                                        "type": "string",
+                                        "example": "771234567"
+                                    },
+                                    "otp": {
+                                        "description": "Code OTP à 6 chiffres",
+                                        "type": "string",
+                                        "example": "123456"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OTP vérifié avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Vous pouvez vous connecter maintenant"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "OTP vérifié avec succès. Vos identifiants ont été envoyés par SMS."
+                                                },
+                                                "verified_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2024-01-15 10:30:00"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "verified"
+                                                },
+                                                "user_info": {
+                                                    "properties": {
+                                                        "numero_user": {
+                                                            "type": "string",
+                                                            "example": "771234567"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "OTP incorrect ou expiré",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "OTP incorrect ou expiré"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Numéro d'utilisateur invalide",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Numéro d'utilisateur invalide"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "User": {
+                "title": "User",
+                "description": "Schéma de l'utilisateur",
+                "properties": {
+                    "id": {
+                        "description": "ID unique de l'utilisateur",
+                        "type": "string",
+                        "example": "uuid-string"
+                    },
+                    "nom": {
+                        "description": "Nom de l'utilisateur",
+                        "type": "string",
+                        "example": "Dupont"
+                    },
+                    "prenom": {
+                        "description": "Prénom de l'utilisateur",
+                        "type": "string",
+                        "example": "Jean"
+                    },
+                    "email": {
+                        "description": "Email de l'utilisateur",
+                        "type": "string",
+                        "format": "email",
+                        "example": "jean.dupont@email.com"
+                    },
+                    "role": {
+                        "description": "Rôle de l'utilisateur",
+                        "type": "string",
+                        "enum": [
+                            "client",
+                            "marchand"
+                        ],
+                        "example": "client"
+                    },
+                    "adresse": {
+                        "description": "Adresse de l'utilisateur",
+                        "type": "string",
+                        "example": "123 Rue de la Paix, Dakar"
+                    },
+                    "nci": {
+                        "description": "Numéro de carte d'identité",
+                        "type": "string",
+                        "example": "1234567890123"
+                    },
+                    "email_verified_at": {
+                        "description": "Date de vérification email",
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-01-15 10:30:00"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-01-15 10:30:00"
+                    }
+                },
+                "type": "object"
+            },
+            "Compte": {
+                "title": "Compte",
+                "description": "Schéma du compte bancaire",
+                "properties": {
+                    "id": {
+                        "description": "ID unique du compte",
+                        "type": "string",
+                        "example": "uuid-string"
+                    },
+                    "numero_compte": {
+                        "description": "Numéro de compte",
+                        "type": "string",
+                        "example": "SN001234567890"
+                    },
+                    "numero_user": {
+                        "description": "Numéro d'utilisateur associé",
+                        "type": "string",
+                        "example": "771234567"
+                    },
+                    "code_marchand": {
+                        "description": "Code marchand",
+                        "type": "string",
+                        "example": "MARCH001"
+                    },
+                    "login": {
+                        "description": "Login de connexion",
+                        "type": "string",
+                        "example": "user123"
+                    },
+                    "solde": {
+                        "description": "Solde actuel du compte",
+                        "type": "number",
+                        "format": "float",
+                        "example": 1500.5
+                    },
+                    "user_type": {
+                        "description": "Type d'utilisateur",
+                        "type": "string",
+                        "example": "App\\\\Models\\\\Client"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-01-15 10:30:00"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-01-15 10:30:00"
+                    },
+                    "transactions": {
+                        "description": "Transactions du compte (conditionnel)",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Transaction"
+                        }
+                    },
+                    "user": {
+                        "$ref": "#/components/schemas/User"
+                    }
+                },
+                "type": "object"
+            },
+            "Transaction": {
+                "title": "Transaction",
+                "description": "Schéma d'une transaction",
+                "properties": {
+                    "id": {
+                        "description": "ID unique de la transaction",
+                        "type": "string",
+                        "example": "uuid-string"
+                    },
+                    "montant": {
+                        "description": "Montant de la transaction",
+                        "type": "number",
+                        "format": "float",
+                        "example": 500
+                    },
+                    "type_transaction": {
+                        "description": "Type de transaction",
+                        "type": "string",
+                        "enum": [
+                            "Depot",
+                            "Retrait",
+                            "Payement"
+                        ],
+                        "example": "Depot"
+                    },
+                    "compte_id": {
+                        "description": "ID du compte associé",
+                        "type": "string",
+                        "example": "uuid-string"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-01-15 10:30:00"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-01-15 10:30:00"
+                    },
+                    "compte": {
+                        "$ref": "#/components/schemas/Compte"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT",
+                "description": "Enter your Bearer token in the format: Bearer {token}"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Authentification",
+            "description": "Gestion de l'authentification des utilisateurs"
+        },
+        {
+            "name": "OTP",
+            "description": "Gestion des codes OTP pour l'authentification"
+        },
+        {
+            "name": "Utilisateur",
+            "description": "Gestion des informations utilisateur"
+        }
+    ]
+}

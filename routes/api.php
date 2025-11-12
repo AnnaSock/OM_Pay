@@ -1,6 +1,7 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\ClientController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,6 +15,16 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+
+// Authentification
+Route::post('/sendOtp', [ClientController::class, 'sendOtp']);
+Route::post('/verifyOtp', [ClientController::class, 'verifyOtp']);
+Route::post('/login', [AuthController::class, 'login']);
+// Routes protégées
+Route::middleware('auth:api-client')->group(function () {
+    Route::get('/me', [ClientController::class, 'me']);
 });
+
+
+
+
