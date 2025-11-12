@@ -9,14 +9,15 @@
         "version": "1.0.0"
     },
     "servers": [
+         {
+            "url": "https://annasock-ompay.onrender.com",
+            "description": "Serveur de production"
+        },
         {
             "url": "http://localhost:8000",
             "description": "Serveur de développement"
-        },
-        {
-            "url": "https://api.ompay.com",
-            "description": "Serveur de production"
         }
+       
     ],
     "paths": {
         "/api/login": {
