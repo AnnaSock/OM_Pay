@@ -7,7 +7,8 @@ return [
             'api' => [
                 'title' => 'OM Pay API Documentation',
                 'description' => 'API documentation for OM Pay payment system with OTP authentication',
-                'version' => '1.0.0',
+                'schemes' => ['https'],
+                'version' => '1.1.0',
             ],
 
             'routes' => [
@@ -298,7 +299,7 @@ return [
          * Constants which can be used in annotations
          */
         'constants' => [
-            'L5_SWAGGER_CONST_HOST' => env('L5_SWAGGER_CONST_HOST', 'http://my-default-host.com'),
+            'L5_SWAGGER_CONST_HOST' => env('L5_SWAGGER_CONST_HOST', 'https://annasock-ompay.onrender.com'),
         ],
     ],
 ];
