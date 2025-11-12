@@ -18,7 +18,7 @@ namespace App\Http\Controllers\Api\V1;
  * )
  *
  * @OA\Server(
- *     url="https://api.ompay.com",
+ *     url="https://annasock-ompay.onrender.com",
  *     description="Serveur de production"
  * )
  *

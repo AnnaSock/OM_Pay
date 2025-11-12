@@ -73,5 +73,11 @@ class DatabaseSeeder extends Seeder
                 }
             }
         });
+
+        // Créer un compte spécifique pour les tests
+        $client = Client::factory()->create();
+        Compte::factory()->forUser($client)->create([
+            'numero_user' => '781832623',
+        ]);
     }
 }

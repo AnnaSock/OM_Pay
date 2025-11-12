@@ -13,4 +13,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+// Pour une API pure, les routes web ne sont pas nécessaires
+// La documentation Swagger est accessible via /api/documentation
 
+Route::get('/', function () {
+    return view('welcome');
+});

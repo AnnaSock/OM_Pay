@@ -8,15 +8,10 @@ use App\Http\Repositories\ClientRepository;
 use App\Http\Repositories\TransactionRepository;
 use App\Http\Services\ClientService;
 use App\Http\Services\TransactionService;
-use App\Models\Client;
-use App\Models\Marchand;
 use App\Models\Transaction;
-use App\Models\User;
-use App\Observers\ClientObserver;
-use App\Observers\MarchandObserver;
-use App\Observers\UserObserver;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Passport\Passport;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -55,10 +50,6 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
         }
 
-        Client::observe([ClientObserver::class, UserObserver::class]);
-        Marchand::observe([MarchandObserver::class, UserObserver::class]);
-
-        // Forcer Passport à utiliser les UUIDs pour les clients
-        \Laravel\Passport\Passport::setClientUuids(true);
+        Passport::setClientUuids(true);
     }
 }

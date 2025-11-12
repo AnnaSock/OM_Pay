@@ -14,7 +14,7 @@
             "description": "Serveur de développement"
         },
         {
-            "url": "https://api.ompay.com",
+            "url": "https://annasock-ompay.onrender.com",
             "description": "Serveur de production"
         }
     ],
@@ -625,9 +625,9 @@
         "securitySchemes": {
             "bearerAuth": {
                 "type": "http",
-                "scheme": "bearer",
+                "description": "Enter your Bearer token in the format: Bearer {token}",
                 "bearerFormat": "JWT",
-                "description": "Enter your Bearer token in the format: Bearer {token}"
+                "scheme": "bearer"
             }
         }
     },
