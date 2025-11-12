@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\ClientController;
+use App\Http\Controllers\Api\V1\CompteController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -20,6 +21,9 @@ use Illuminate\Support\Facades\Route;
 Route::post('/sendOtp', [ClientController::class, 'sendOtp']);
 Route::post('/verifyOtp', [ClientController::class, 'verifyOtp']);
 Route::post('/login', [AuthController::class, 'login']);
+
+// Comptes
+Route::post('/comptes', [CompteController::class, 'store']);
 // Routes protégées
 Route::middleware('auth:api-client')->group(function () {
     Route::get('/me', [ClientController::class, 'me']);
