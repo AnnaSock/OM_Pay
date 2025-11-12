@@ -15,6 +15,7 @@ use App\Models\User;
 use App\Observers\ClientObserver;
 use App\Observers\MarchandObserver;
 use App\Observers\UserObserver;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -47,7 +48,13 @@ class AppServiceProvider extends ServiceProvider
      * Bootstrap any application services.
      */
     public function boot(): void
+    
     {
+
+        if ($this->app->environment('production')) {
+            URL::forceScheme('https');
+        }
+
         Client::observe([ClientObserver::class, UserObserver::class]);
         Marchand::observe([MarchandObserver::class, UserObserver::class]);
 

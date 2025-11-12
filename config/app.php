@@ -41,8 +41,8 @@ return [
     | application. If disabled, a simple generic error page is shown.
     |
     */
+'debug' => env('APP_DEBUG', env('APP_ENV') !== 'production'),
 
-    'debug' => (bool) env('APP_DEBUG', false),
 
     /*
     |--------------------------------------------------------------------------
@@ -55,7 +55,7 @@ return [
     |
     */
 
-    'url' => env('APP_URL', 'http://localhost'),
+    'url' => env('APP_URL', 'https://annasock-ompay.onrender.com'),
 
     'asset_url' => env('ASSET_URL'),
 
