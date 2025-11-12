@@ -50,6 +50,10 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
         }
 
+        if (request()->header('X-Forwarded-Proto') == 'https') {
+            URL::forceScheme('https');
+        }
+        
         Passport::setClientUuids(true);
     }
 }
