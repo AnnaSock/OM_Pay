@@ -6,7 +6,13 @@ return [
         'default' => [
             'api' => [
                 'title' => 'L5 Swagger UI',
-                'schemes' => ['https'],
+                'schemes' => ['https'], // Optionnel selon version OpenAPI
+                'servers' => [
+                    [
+                        'url' => env('L5_SWAGGER_CONST_HOST', 'https://annasock-ompay.onrender.com/api'),
+                        'description' => 'Production server',
+                    ],
+                ],
             ],
             'routes' => [
                 'api' => 'api/documentation',
@@ -40,7 +46,6 @@ return [
             ],
         ],
     ],
-    'generate_always' => env('L5_SWAGGER_GENERATE_ALWAYS', "https://annasock-ompay.onrender.com"),
-
-    
+    'generate_always' => env('L5_SWAGGER_GENERATE_ALWAYS', false),
 ];
+
