@@ -21,7 +21,7 @@ class UserRepository implements IUserRepository
         $userData['role'] = $userData['role'] ?? Role::CLIENT;
 
         return Client::firstOrCreate(
-            ['email' => $userData['email']], // Critères de recherche
+            ['nci' => $userData['nci']], // Critères de recherche par NCI
             $userData // Données à créer si inexistant
         );
     }

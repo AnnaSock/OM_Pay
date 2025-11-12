@@ -445,6 +445,253 @@
                     }
                 }
             }
+        },
+        "/api/comptes": {
+            "post": {
+                "tags": [
+                    "Comptes"
+                ],
+                "summary": "Créer un compte utilisateur avec dépôt initial",
+                "description": "Crée un nouvel utilisateur (ou récupère un existant via NCI), génère automatiquement un numéro de compte, login et code marchand, puis effectue un dépôt initial",
+                "operationId": "createCompte",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "nom",
+                                    "prenom",
+                                    "adresse",
+                                    "nci",
+                                    "email",
+                                    "numero_user",
+                                    "password",
+                                    "montant_initial"
+                                ],
+                                "properties": {
+                                    "nom": {
+                                        "description": "Nom de l'utilisateur",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Doe"
+                                    },
+                                    "prenom": {
+                                        "description": "Prénom de l'utilisateur",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "John"
+                                    },
+                                    "adresse": {
+                                        "description": "Adresse de l'utilisateur",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "123 Rue de la Paix, Dakar"
+                                    },
+                                    "nci": {
+                                        "description": "Numéro de carte d'identité nationale (unique)",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "1234567890123"
+                                    },
+                                    "email": {
+                                        "description": "Adresse email de l'utilisateur",
+                                        "type": "string",
+                                        "format": "email",
+                                        "maxLength": 255,
+                                        "example": "john.doe@example.com"
+                                    },
+                                    "numero_user": {
+                                        "description": "Numéro d'utilisateur unique",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "771234567"
+                                    },
+                                    "password": {
+                                        "description": "Mot de passe (sera hashé automatiquement)",
+                                        "type": "string",
+                                        "minLength": 8,
+                                        "example": "password123"
+                                    },
+                                    "montant_initial": {
+                                        "description": "Montant du dépôt initial",
+                                        "type": "number",
+                                        "format": "float",
+                                        "minimum": 0,
+                                        "example": 1000
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Compte créé avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Compte créé avec succès"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "compte": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "string",
+                                                            "format": "uuid",
+                                                            "example": "550e8400-e29b-41d4-a716-446655440000"
+                                                        },
+                                                        "numero_compte": {
+                                                            "description": "Numéro de compte généré automatiquement (10 chiffres)",
+                                                            "type": "string",
+                                                            "example": "1234567890"
+                                                        },
+                                                        "numero_user": {
+                                                            "type": "string",
+                                                            "example": "771234567"
+                                                        },
+                                                        "login": {
+                                                            "description": "Login généré automatiquement",
+                                                            "type": "string",
+                                                            "example": "USER12345"
+                                                        },
+                                                        "code_marchand": {
+                                                            "description": "Code marchand généré (null pour les clients)",
+                                                            "type": "string",
+                                                            "example": "M01234567",
+                                                            "nullable": true
+                                                        },
+                                                        "solde": {
+                                                            "type": "number",
+                                                            "format": "float",
+                                                            "example": 1000
+                                                        },
+                                                        "user": {
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "string",
+                                                                    "format": "uuid"
+                                                                },
+                                                                "nom": {
+                                                                    "type": "string"
+                                                                },
+                                                                "prenom": {
+                                                                    "type": "string"
+                                                                },
+                                                                "email": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "transaction_depot": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "string",
+                                                            "format": "uuid"
+                                                        },
+                                                        "montant": {
+                                                            "type": "number",
+                                                            "format": "float",
+                                                            "example": 1000
+                                                        },
+                                                        "type_transaction": {
+                                                            "type": "string",
+                                                            "example": "Depot"
+                                                        },
+                                                        "compte_id": {
+                                                            "type": "string",
+                                                            "format": "uuid"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation des données d'entrée",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Erreur de validation"
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "nom": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "Le nom est obligatoire."
+                                                    }
+                                                },
+                                                "email": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "Cette adresse email est déjà utilisée."
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erreur interne du serveur",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Erreur lors de la création du compte"
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Détails de l'erreur"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -514,17 +761,20 @@
             },
             "Compte": {
                 "title": "Compte",
-                "description": "Schéma du compte bancaire",
+                "description": "Schéma du compte bancaire avec génération automatique des identifiants",
                 "properties": {
                     "id": {
-                        "description": "ID unique du compte",
+                        "description": "ID unique du compte (UUID généré automatiquement)",
                         "type": "string",
-                        "example": "uuid-string"
+                        "format": "uuid",
+                        "example": "550e8400-e29b-41d4-a716-446655440000"
                     },
                     "numero_compte": {
-                        "description": "Numéro de compte",
+                        "description": "Numéro de compte généré automatiquement (10 chiffres)",
                         "type": "string",
-                        "example": "SN001234567890"
+                        "maxLength": 10,
+                        "minLength": 10,
+                        "example": "1234567890"
                     },
                     "numero_user": {
                         "description": "Numéro d'utilisateur associé",
@@ -532,14 +782,15 @@
                         "example": "771234567"
                     },
                     "code_marchand": {
-                        "description": "Code marchand",
+                        "description": "Code marchand généré automatiquement (null pour les clients)",
                         "type": "string",
-                        "example": "MARCH001"
+                        "example": "M01234567",
+                        "nullable": true
                     },
                     "login": {
-                        "description": "Login de connexion",
+                        "description": "Login généré automatiquement (format USERxxxxx)",
                         "type": "string",
-                        "example": "user123"
+                        "example": "USER12345"
                     },
                     "solde": {
                         "description": "Solde actuel du compte",
@@ -643,6 +894,10 @@
         {
             "name": "Utilisateur",
             "description": "Gestion des informations utilisateur"
+        },
+        {
+            "name": "Comptes",
+            "description": "Gestion des comptes utilisateur"
         }
     ]
 }

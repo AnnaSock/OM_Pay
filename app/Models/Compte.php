@@ -20,6 +20,7 @@ class Compte extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'id',
         'user_id',
         'user_type',
         'numero_compte',

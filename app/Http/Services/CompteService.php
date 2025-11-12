@@ -7,11 +7,15 @@ use App\Http\Interfaces\ICompteRepository;
 use App\Http\Interfaces\ITransactionRepository;
 use App\Models\Compte;
 use App\Models\User;
+use App\Traits\GeneratesUniqueCodes;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Exception;
 
 class CompteService
 {
+    use GeneratesUniqueCodes;
+
     protected IUserRepository $userRepository;
     protected ICompteRepository $compteRepository;
     protected ITransactionRepository $transactionRepository;
@@ -30,31 +34,31 @@ class CompteService
      * Crée un utilisateur, un compte et une transaction de dépôt initiale
      *
      * @param array $userData
-     * @param string $accountNumber
      * @param float $initialDeposit
      * @return Compte
      * @throws Exception
      */
-    public function createUserCompteWithInitialDeposit(array $userData, string $accountNumber, float $initialDeposit): Compte
+    public function createUserCompteWithInitialDeposit(array $userData, float $initialDeposit): Compte
     {
-        return DB::transaction(function () use ($userData, $accountNumber, $initialDeposit) {
+        return DB::transaction(function () use ($userData, $initialDeposit) {
             // 1. Récupérer ou créer l'utilisateur
             $user = $this->userRepository->firstOrCreateUser($userData);
 
-            // 2. Vérifier si le numéro de compte est unique pour cet utilisateur
-            if ($this->compteRepository->compteExistsForUser($user->id, $accountNumber)) {
-                throw new Exception('Un compte avec ce numéro existe déjà pour cet utilisateur');
-            }
+            // 2. Générer les valeurs uniques pour le compte
+            $numeroCompte = $this->generateUniqueNumeroCompte();
+            $login = $this->generateUniqueLogin();
+            $codeMarchand = $user instanceof \App\Models\Marchand ? $this->generateUniqueCodeMarchand() : null;
 
-            // 3. Créer le compte
+            // 3. Créer le compte avec les valeurs générées
             $compteData = [
+                'id' => (string) \Illuminate\Support\Str::uuid(),
                 'user_id' => $user->id,
                 'user_type' => get_class($user),
-                'numero_compte' => $accountNumber,
+                'numero_compte' => $numeroCompte,
                 'numero_user' => $userData['numero_user'] ?? null,
-                'login' => $userData['login'] ?? null,
-                'password' => $userData['password'] ?? null,
-                'code_marchand' => $userData['code_marchand'] ?? null,
+                'login' => $login,
+                'password' => isset($userData['password']) ? Hash::make($userData['password']) : null,
+                'code_marchand' => $codeMarchand,
             ];
 
             $compte = $this->compteRepository->createCompte($compteData);
