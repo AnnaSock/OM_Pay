@@ -3,9 +3,13 @@
 namespace App\Providers;
 
 use App\Models\Client;
+use App\Models\Compte;
 use App\Models\Marchand;
+use App\Models\Transaction;
 use App\Observers\ClientObserver;
+use App\Observers\CompteObserver;
 use App\Observers\MarchandObserver;
+use App\Observers\TransactionObserver;
 use App\Observers\UserObserver;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
@@ -39,7 +43,9 @@ class EventServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Client::observe([ClientObserver::class, UserObserver::class]);
+        Compte::observe(CompteObserver::class);
         Marchand::observe([MarchandObserver::class, UserObserver::class]);
+        Transaction::observe(TransactionObserver::class);
     }
 
     /**

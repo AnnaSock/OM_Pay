@@ -51,7 +51,6 @@ class CompteService
 
             // 3. Créer le compte avec les valeurs générées
             $compteData = [
-                'id' => (string) \Illuminate\Support\Str::uuid(),
                 'user_id' => $user->id,
                 'user_type' => get_class($user),
                 'numero_compte' => $numeroCompte,
@@ -65,7 +64,6 @@ class CompteService
 
             // 4. Créer la transaction de dépôt initiale
             $transactionData = [
-                'id' => (string) \Illuminate\Support\Str::uuid(),
                 'montant' => $initialDeposit,
                 'compte_id' => $compte->id,
             ];

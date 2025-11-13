@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enums\ValidationMessages;
+use App\Rules\ValidTelephone;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -25,7 +26,7 @@ class SendOtpRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'numero_user' => 'required|string|regex:/^[0-9+\-\s]+$/|max:20',
+            'numero_user' => ['required', 'string', 'max:20', new ValidTelephone()],
         ];
     }
 

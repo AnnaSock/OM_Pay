@@ -452,7 +452,7 @@
                     "Comptes"
                 ],
                 "summary": "Créer un compte utilisateur avec dépôt initial",
-                "description": "Crée un nouvel utilisateur (ou récupère un existant via NCI), génère automatiquement un numéro de compte, login et code marchand, puis effectue un dépôt initial",
+                "description": "Crée un nouvel utilisateur (ou récupère un existant via NCI), génère automatiquement un numéro de compte Orange Money, login et code marchand, puis effectue un dépôt initial",
                 "operationId": "createCompte",
                 "requestBody": {
                     "required": true,
@@ -540,86 +540,6 @@
                                         "message": {
                                             "type": "string",
                                             "example": "Compte créé avec succès"
-                                        },
-                                        "data": {
-                                            "properties": {
-                                                "compte": {
-                                                    "properties": {
-                                                        "id": {
-                                                            "type": "string",
-                                                            "format": "uuid",
-                                                            "example": "550e8400-e29b-41d4-a716-446655440000"
-                                                        },
-                                                        "numero_compte": {
-                                                            "description": "Numéro de compte généré automatiquement (10 chiffres)",
-                                                            "type": "string",
-                                                            "example": "1234567890"
-                                                        },
-                                                        "numero_user": {
-                                                            "type": "string",
-                                                            "example": "771234567"
-                                                        },
-                                                        "login": {
-                                                            "description": "Login généré automatiquement",
-                                                            "type": "string",
-                                                            "example": "USER12345"
-                                                        },
-                                                        "code_marchand": {
-                                                            "description": "Code marchand généré (null pour les clients)",
-                                                            "type": "string",
-                                                            "example": "M01234567",
-                                                            "nullable": true
-                                                        },
-                                                        "solde": {
-                                                            "type": "number",
-                                                            "format": "float",
-                                                            "example": 1000
-                                                        },
-                                                        "user": {
-                                                            "properties": {
-                                                                "id": {
-                                                                    "type": "string",
-                                                                    "format": "uuid"
-                                                                },
-                                                                "nom": {
-                                                                    "type": "string"
-                                                                },
-                                                                "prenom": {
-                                                                    "type": "string"
-                                                                },
-                                                                "email": {
-                                                                    "type": "string"
-                                                                }
-                                                            },
-                                                            "type": "object"
-                                                        }
-                                                    },
-                                                    "type": "object"
-                                                },
-                                                "transaction_depot": {
-                                                    "properties": {
-                                                        "id": {
-                                                            "type": "string",
-                                                            "format": "uuid"
-                                                        },
-                                                        "montant": {
-                                                            "type": "number",
-                                                            "format": "float",
-                                                            "example": 1000
-                                                        },
-                                                        "type_transaction": {
-                                                            "type": "string",
-                                                            "example": "Depot"
-                                                        },
-                                                        "compte_id": {
-                                                            "type": "string",
-                                                            "format": "uuid"
-                                                        }
-                                                    },
-                                                    "type": "object"
-                                                }
-                                            },
-                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -678,7 +598,7 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Erreur lors de la création du compte"
+                                            "example": "Erreur interne du serveur"
                                         },
                                         "error": {
                                             "type": "string",
@@ -691,6 +611,621 @@
                         }
                     }
                 }
+            }
+        },
+        "/api/{numero-compte}/solde": {
+            "post": {
+                "tags": [
+                    "Comptes"
+                ],
+                "summary": "Consulter le solde d'un compte",
+                "description": "Récupère le solde actuel d'un compte Orange Money. L'utilisateur doit être authentifié et propriétaire du compte.",
+                "operationId": "getSolde",
+                "parameters": [
+                    {
+                        "name": "numero-compte",
+                        "in": "path",
+                        "description": "Numéro du compte bancaire",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "1234567890"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Solde récupéré avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Solde récupéré avec succès"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "compte_id": {
+                                                    "type": "string",
+                                                    "format": "uuid",
+                                                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                                                },
+                                                "solde": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 1500.5
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès refusé - L'utilisateur n'est pas propriétaire du compte",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Accès non autorisé"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Compte non trouvé",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Compte non trouvé"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/{numero-compte}/transaction": {
+            "post": {
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "Récupérer les transactions d'un compte",
+                "description": "Récupère les transactions associées à un compte Orange Money avec pagination et filtrage optionnel par type. L'utilisateur doit être authentifié et propriétaire du compte.",
+                "operationId": "getTransactions",
+                "parameters": [
+                    {
+                        "name": "numero-compte",
+                        "in": "path",
+                        "description": "Numéro du compte Orange Money",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "7712345678"
+                        }
+                    },
+                    {
+                        "name": "type_transaction",
+                        "in": "query",
+                        "description": "Filtrer par type de transaction",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "Depot",
+                                "Retrait",
+                                "Payement"
+                            ],
+                            "example": "Depot"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Numéro de la page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Nombre d'éléments par page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 100,
+                            "minimum": 1,
+                            "example": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Transactions récupérées avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Transactions récupérées avec succès"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "transactions": {
+                                                    "properties": {
+                                                        "current_page": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "data": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/components/schemas/Transaction"
+                                                            }
+                                                        },
+                                                        "first_page_url": {
+                                                            "type": "string",
+                                                            "example": "http://localhost:8000/api/7712345678/transaction?page=1"
+                                                        },
+                                                        "from": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "last_page": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "last_page_url": {
+                                                            "type": "string",
+                                                            "example": "http://localhost:8000/api/7712345678/transaction?page=1"
+                                                        },
+                                                        "next_page_url": {
+                                                            "type": "string",
+                                                            "example": null,
+                                                            "nullable": true
+                                                        },
+                                                        "path": {
+                                                            "type": "string",
+                                                            "example": "http://localhost:8000/api/7712345678/transaction"
+                                                        },
+                                                        "per_page": {
+                                                            "type": "integer",
+                                                            "example": 15
+                                                        },
+                                                        "prev_page_url": {
+                                                            "type": "string",
+                                                            "example": null,
+                                                            "nullable": true
+                                                        },
+                                                        "to": {
+                                                            "type": "integer",
+                                                            "example": 3
+                                                        },
+                                                        "total": {
+                                                            "type": "integer",
+                                                            "example": 3
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès refusé - L'utilisateur n'est pas propriétaire du compte",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Accès non autorisé"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Compte non trouvé",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Compte non trouvé"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/{numero_compte}/transfert": {
+            "post": {
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "Effectuer un transfert d'argent",
+                "description": "Permet à un utilisateur authentifié d'effectuer un transfert d'argent vers un autre compte. L'utilisateur doit être propriétaire du compte émetteur.",
+                "operationId": "transfert",
+                "parameters": [
+                    {
+                        "name": "numero_compte",
+                        "in": "path",
+                        "description": "Numéro de compte de l'émetteur",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "1234567890"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "numero_user_destinataire",
+                                    "montant"
+                                ],
+                                "properties": {
+                                    "numero_user_destinataire": {
+                                        "description": "Numéro utilisateur du destinataire",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "771234568"
+                                    },
+                                    "montant": {
+                                        "description": "Montant à transférer",
+                                        "type": "number",
+                                        "format": "float",
+                                        "minimum": 0.01,
+                                        "example": 100
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Transfert effectué avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Transfert effectué avec succès"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Solde insuffisant ou transfert à soi-même",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Solde insuffisant"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès refusé - L'utilisateur n'est pas propriétaire du compte émetteur",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Accès non autorisé"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Compte émetteur ou destinataire non trouvé",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Compte non trouvé"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation des données d'entrée",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Erreur de validation"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/{numero_compte}/paiement": {
+            "post": {
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "Effectuer un paiement vers un marchand",
+                "description": "Permet à un utilisateur authentifié d'effectuer un paiement vers un marchand spécifique. L'utilisateur doit être propriétaire du compte émetteur.",
+                "operationId": "paiement",
+                "parameters": [
+                    {
+                        "name": "numero_compte",
+                        "in": "path",
+                        "description": "Numéro de compte de l'émetteur",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "1234567890"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "code_marchand",
+                                    "montant"
+                                ],
+                                "properties": {
+                                    "code_marchand": {
+                                        "description": "Code identifiant du marchand destinataire",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "MARCHAND001"
+                                    },
+                                    "montant": {
+                                        "description": "Montant du paiement",
+                                        "type": "number",
+                                        "format": "float",
+                                        "minimum": 0.01,
+                                        "example": 500
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Paiement effectué avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Paiement effectué avec succès"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Solde insuffisant ou paiement interdit",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Solde insuffisant"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès refusé - L'utilisateur n'est pas propriétaire du compte émetteur",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Accès non autorisé"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Compte émetteur ou marchand non trouvé",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Marchand non trouvé"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation des données d'entrée",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Erreur de validation"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         }
     },
@@ -760,8 +1295,8 @@
                 "type": "object"
             },
             "Compte": {
-                "title": "Compte",
-                "description": "Schéma du compte bancaire avec génération automatique des identifiants",
+                "title": "Compte Orange Money",
+                "description": "Schéma du compte Orange Money avec génération automatique des identifiants",
                 "properties": {
                     "id": {
                         "description": "ID unique du compte (UUID généré automatiquement)",
@@ -770,11 +1305,11 @@
                         "example": "550e8400-e29b-41d4-a716-446655440000"
                     },
                     "numero_compte": {
-                        "description": "Numéro de compte généré automatiquement (10 chiffres)",
+                        "description": "Numéro de compte Orange Money généré automatiquement (10 chiffres)",
                         "type": "string",
                         "maxLength": 10,
                         "minLength": 10,
-                        "example": "1234567890"
+                        "example": "7712345678"
                     },
                     "numero_user": {
                         "description": "Numéro d'utilisateur associé",
@@ -793,7 +1328,7 @@
                         "example": "USER12345"
                     },
                     "solde": {
-                        "description": "Solde actuel du compte",
+                        "description": "Solde actuel du compte Orange Money",
                         "type": "number",
                         "format": "float",
                         "example": 1500.5
@@ -896,8 +1431,12 @@
             "description": "Gestion des informations utilisateur"
         },
         {
+            "name": "Transactions",
+            "description": "Gestion des transactions (transferts, retraits, dépôts)"
+        },
+        {
             "name": "Comptes",
-            "description": "Gestion des comptes utilisateur"
+            "description": "Comptes"
         }
     ]
 }

@@ -14,9 +14,12 @@ class TransactionResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        // Formater le montant avec le signe approprié
+        $montantFormate = $this->formatMontantAvecSigne($this->montant, $this->type_transaction->value);
+
         return [
             'id' => $this->id,
-            'montant' => $this->montant,
+            'montant_formate' => $montantFormate,
             'type_transaction' => $this->type_transaction,
             'compte_id' => $this->compte_id,
             'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
@@ -26,5 +29,24 @@ class TransactionResource extends JsonResource
                 fn() => new CompteResource($this->whenLoaded('compte'))
             ),
         ];
+    }
+
+    /**
+     * Formate le montant avec le signe approprié selon le type de transaction
+     *
+     * @param float $montant
+     * @param string $typeTransaction
+     * @return string
+     */
+    private function formatMontantAvecSigne(float $montant, string $typeTransaction): string
+    {
+        if ($typeTransaction === 'Depot') {
+            return '+' . number_format($montant, 2, '.', '');
+        } elseif (in_array($typeTransaction, ['Retrait', 'Payement'])) {
+            return '-' . number_format($montant, 2, '.', '');
+        }
+
+        // Par défaut, retourner le montant sans signe
+        return number_format($montant, 2, '.', '');
     }
 }

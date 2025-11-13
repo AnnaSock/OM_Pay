@@ -9,6 +9,7 @@ use App\Models\Compte;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 /**
  * @OA\Tag(
@@ -61,9 +62,10 @@ class AuthController extends \App\Http\Controllers\Controller
      */
     public function login(LoginRequest $request)
     {
+        $validated = $request->validated();
 
         // Rechercher le compte par login
-        $compte = Compte::where('login', $request->login)->first();
+        $compte = Compte::byLogin($validated['login'])->first();
 
         if (!$compte) {
             return $this->errorResponse(
@@ -74,7 +76,7 @@ class AuthController extends \App\Http\Controllers\Controller
         }
 
         // Vérifier le mot de passe
-        if (!\Illuminate\Support\Facades\Hash::check($request->password, $compte->password)) {
+        if (!Hash::check($validated['password'], $compte->password)) {
             return $this->errorResponse(
                 ResponseMessages::AUTHENTIFICATION_ECHOUEE->value,
                 HttpStatusCodes::UNAUTHORIZED->value,

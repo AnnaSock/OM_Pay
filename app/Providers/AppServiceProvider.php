@@ -30,7 +30,7 @@ class AppServiceProvider extends ServiceProvider
                 return new TransactionRepository();
         });
         $this->app->singleton(TransactionService::class, function($app){
-                $transactionRepo= $app->make(IRepository::class);
+                $transactionRepo= $app->make(ITransactionRepository::class);
                 return new TransactionService($transactionRepo);
         });
 

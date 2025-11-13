@@ -8,7 +8,7 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class VerifyOtpRequest extends FormRequest
+class TransfertRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,8 +26,8 @@ class VerifyOtpRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'numero_user' => ['required', 'string', 'max:20', new ValidTelephone()],
-            'otp' => 'required|string|size:6|regex:/^[0-9]+$/',
+            'numero_user_destinataire' => ['required', 'string', 'max:255', 'exists:comptes,numero_user', new ValidTelephone()],
+            'montant' => 'required|numeric|min:0.01',
         ];
     }
 
@@ -39,14 +39,13 @@ class VerifyOtpRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'numero_user.required' => ValidationMessages::REQUIRED_NUMERO_USER->getMessage(),
-            'numero_user.string' => ValidationMessages::STRING_NUMERO_USER->getMessage(),
-            'numero_user.regex' => ValidationMessages::REGEX_NUMERO_USER->getMessage(),
-            'numero_user.max' => ValidationMessages::MAX_NUMERO_USER->getMessage(),
-            'otp.required' => ValidationMessages::REQUIRED_OTP->getMessage(),
-            'otp.string' => ValidationMessages::STRING_OTP->getMessage(),
-            'otp.size' => ValidationMessages::SIZE_OTP->getMessage(),
-            'otp.regex' => ValidationMessages::REGEX_OTP->getMessage(),
+            'numero_user_destinataire.required' => ValidationMessages::REQUIRED_NUMERO_USER->getMessage(),
+            'numero_user_destinataire.string' => ValidationMessages::STRING_NUMERO_USER->getMessage(),
+            'numero_user_destinataire.max' => ValidationMessages::MAX_NUMERO_USER->getMessage(),
+            'numero_user_destinataire.exists' => 'Le destinataire n\'existe pas',
+            'montant.required' => ValidationMessages::REQUIRED_MONTANT->getMessage(),
+            'montant.numeric' => ValidationMessages::DECIMAL_INVALID->getMessage(),
+            'montant.min' => ValidationMessages::MONTANT_MIN->getMessage(),
         ];
     }
 
@@ -58,12 +57,12 @@ class VerifyOtpRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'numero_user' => 'numéro d\'utilisateur',
-            'otp' => 'code OTP',
+            'numero_user_destinataire' => 'numéro utilisateur destinataire',
+            'montant' => 'montant',
         ];
     }
 
-     protected function failedValidation(Validator $validator)
+    protected function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(
             response()->json([

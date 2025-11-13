@@ -84,6 +84,30 @@ class Compte extends Model
     }
 
     /**
+     * Scope to find compte by numero_compte.
+     */
+    public function scopeByNumeroCompte($query, string $numeroCompte)
+    {
+        return $query->where('numero_compte', $numeroCompte);
+    }
+
+    /**
+     * Scope to find compte by code_marchand.
+     */
+    public function scopeByCodeMarchand($query, string $codeMarchand)
+    {
+        return $query->where('code_marchand', $codeMarchand);
+    }
+
+    /**
+     * Scope to find compte by login.
+     */
+    public function scopeByLogin($query, string $login)
+    {
+        return $query->where('login', $login);
+    }
+
+    /**
      * Get the solde attribute.
      */
     public function getSoldeAttribute(): float

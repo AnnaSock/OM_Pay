@@ -2,21 +2,46 @@
 
 namespace App\Http\Services;
 
-use App\Http\Interfaces\IRepository;
-use App\Http\Repositories\TransactionRepository;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use App\Http\Interfaces\ITransactionRepository;
 
 class TransactionService{
 
     protected $transactionRepository;
 
-    public function __construct(IRepository $transactionRepository)
+    public function __construct(ITransactionRepository $transactionRepository)
     {
         $this->transactionRepository = $transactionRepository;
     }
 
-    public function getAllTransactions(array $filters = [], $sort = 'created_at', $order = 'desc', $limit = 10): LengthAwarePaginator
+
+    /**
+     * Effectue un transfert atomique entre deux comptes
+     *
+     * @param string $compteEmetteurId
+     * @param string $compteDestinataireId
+     * @param float $montant
+     * @return void
+     */
+    public function performTransfer(string $compteEmetteurId, string $compteDestinataireId, float $montant): void
     {
-        return $this->transactionRepository->all($filters, $sort, $order, $limit);
+        $this->transactionRepository->performTransfer($compteEmetteurId, $compteDestinataireId, $montant);
+    }
+
+    /**
+     * Effectue un paiement atomique vers un marchand
+     *
+     * @param string $compteEmetteurId
+     * @param string $compteMarchandId
+     * @param float $montant
+     * @return void
+     */
+    public function performPayment(string $compteEmetteurId, string $compteMarchandId, float $montant): void
+    {
+        $this->transactionRepository->performPayment($compteEmetteurId, $compteMarchandId, $montant);
+    }
+
+    public function getTransactionsByComptePaginated(string $numeroCompte, ?string $typeTransaction = null, int $perPage = 15)
+    {
+        return $this->transactionRepository->getTransactionsByComptePaginated($numeroCompte, $typeTransaction, $perPage);
     }
 }

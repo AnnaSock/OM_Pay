@@ -4,6 +4,7 @@ namespace App\Http\Repositories;
 
 use App\Http\Interfaces\ICompteRepository;
 use App\Models\Compte;
+use Illuminate\Support\Str;
 
 class CompteRepository implements ICompteRepository
 {
@@ -29,6 +30,9 @@ class CompteRepository implements ICompteRepository
      */
     public function createCompte(array $compteData): Compte
     {
+        if (empty($compteData['id'])) {
+            $compteData['id'] = (string) Str::uuid();
+        }
         return Compte::create($compteData);
     }
 }
