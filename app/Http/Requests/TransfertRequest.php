@@ -3,7 +3,6 @@
 namespace App\Http\Requests;
 
 use App\Enums\ValidationMessages;
-use App\Rules\ValidTelephone;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -26,7 +25,7 @@ class TransfertRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'numero_user_destinataire' => ['required', 'string', 'max:255', 'exists:comptes,numero_user', new ValidTelephone()],
+            'numero_user_destinataire' => 'required|string|max:255|exists:comptes,numero_user',
             'montant' => 'required|numeric|min:0.01',
         ];
     }

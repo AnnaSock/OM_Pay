@@ -4,7 +4,6 @@ namespace App\Http\Requests;
 
 use App\Enums\ValidationMessages;
 use App\Rules\ValidCIN;
-use App\Rules\ValidTelephone;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -32,7 +31,7 @@ class CreateCompteRequest extends FormRequest
             'adresse' => 'required|string|max:255',
             'nci' => ['required', 'string', 'max:255', 'unique:users,nci', new ValidCIN()],
             'email' => 'required|email|max:255|unique:users,email',
-            'numero_user' => ['required', 'string', 'max:255', 'unique:comptes,numero_user', new ValidTelephone()],
+            'numero_user' => 'required|string|max:255|unique:comptes,numero_user',
             'password' => 'required|string|min:8',
             'montant_initial' => 'required|numeric|min:0',
         ];
