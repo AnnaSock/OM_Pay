@@ -10,6 +10,7 @@ use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 
 /**
  * @OA\Tag(
@@ -62,52 +63,61 @@ class AuthController extends \App\Http\Controllers\Controller
      */
     public function login(LoginRequest $request)
     {
-        $validated = $request->validated();
+        try {
+            $validated = $request->validated();
 
-        // Rechercher le compte par login
-        $compte = Compte::byLogin($validated['login'])->first();
+            // Rechercher le compte par login
+            $compte = Compte::byLogin($validated['login'])->first();
 
-        if (!$compte) {
+            if (!$compte) {
+                return $this->errorResponse(
+                    ResponseMessages::AUTHENTIFICATION_ECHOUEE->value,
+                    HttpStatusCodes::UNAUTHORIZED->value,
+                    ['login' => 'Login invalide']
+                );
+            }
+
+            // Vérifier le mot de passe
+            if (!Hash::check($validated['password'], $compte->password)) {
+                return $this->errorResponse(
+                    ResponseMessages::AUTHENTIFICATION_ECHOUEE->value,
+                    HttpStatusCodes::UNAUTHORIZED->value,
+                    ['password' => 'Mot de passe incorrect']
+                );
+            }
+
+            // Authentifier l'utilisateur associé au compte
+            $user = $compte->user;
+
+            if (!$user) {
+                return $this->errorResponse(
+                    ResponseMessages::AUTHENTIFICATION_ECHOUEE->value,
+                    HttpStatusCodes::UNAUTHORIZED->value,
+                    ['login' => 'Utilisateur non trouvé pour ce compte']
+                );
+            }
+
+            // Générer les tokens OAuth avec Passport
+            $token = $user->createToken('Personal Access Token')->accessToken;
+            $refreshToken = $user->createToken('Refresh Token')->accessToken;
+
+            // Retourner la réponse de succès avec les tokens dans la data et dans des cookies HTTP-only
+            $response = $this->successResponse([
+                'access_token' => $token,
+                'refresh_token' => $refreshToken,
+                'user_type' => get_class($user),
+            ], ResponseMessages::AUTHENTIFICATION_REUSSIE->value);
+
+            return $response->cookie('access_token', $token, 60, '/', null, true, true)
+                            ->cookie('refresh_token', $refreshToken, 1440, '/', null, true, true);
+        } catch (\Exception $e) {
+            Log::error('Login error: ' . $e->getMessage());
             return $this->errorResponse(
-                ResponseMessages::AUTHENTIFICATION_ECHOUEE->value,
-                HttpStatusCodes::UNAUTHORIZED->value,
-                ['login' => 'Login invalide']
+                ResponseMessages::SERVER_ERROR->value,
+                HttpStatusCodes::INTERNAL_SERVER_ERROR->value,
+                ['error' => $e->getMessage()]
             );
         }
-
-        // Vérifier le mot de passe
-        if (!Hash::check($validated['password'], $compte->password)) {
-            return $this->errorResponse(
-                ResponseMessages::AUTHENTIFICATION_ECHOUEE->value,
-                HttpStatusCodes::UNAUTHORIZED->value,
-                ['password' => 'Mot de passe incorrect']
-            );
-        }
-
-        // Authentifier l'utilisateur associé au compte
-        $user = $compte->user;
-
-        if (!$user) {
-            return $this->errorResponse(
-                ResponseMessages::AUTHENTIFICATION_ECHOUEE->value,
-                HttpStatusCodes::UNAUTHORIZED->value,
-                ['login' => 'Utilisateur non trouvé pour ce compte']
-            );
-        }
-
-        // Générer les tokens OAuth avec Passport
-        $token = $user->createToken('Personal Access Token')->accessToken;
-        $refreshToken = $user->createToken('Refresh Token')->accessToken;
-
-        // Retourner la réponse de succès avec les tokens dans la data et dans des cookies HTTP-only
-        $response = $this->successResponse([
-            'access_token' => $token,
-            'refresh_token' => $refreshToken,
-            'user_type' => get_class($user),
-        ], ResponseMessages::AUTHENTIFICATION_REUSSIE->value);
-
-        return $response->cookie('access_token', $token, 60, '/', null, true, true)
-                        ->cookie('refresh_token', $refreshToken, 1440, '/', null, true, true);
     }
 
 }
